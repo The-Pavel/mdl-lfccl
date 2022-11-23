@@ -2,6 +2,7 @@ from taxifare.interface.main import preprocess, evaluate, train
 import os
 
 from prefect import task, Flow
+from prefect.run_configs import LocalRun
 
 # Retrieve fresh data
 @task
@@ -52,4 +53,7 @@ if __name__ == '__main__':
     # flow.visualize()                   # visualize the DAG
 
     # flow.run()                         # local run
+    from dotenv import dotenv_values
+    env_dict = dotenv_values(".env")
+    flow.run_config = LocalRun(env=env_dict)
     flow.register("taxifare_project")
