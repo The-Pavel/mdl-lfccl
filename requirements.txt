@@ -21,3 +21,4 @@ google-cloud-storage
 pyarrow
 
 mlflow~=1.26.1
+prefect~=1.4.0
