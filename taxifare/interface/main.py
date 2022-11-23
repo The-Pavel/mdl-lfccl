@@ -115,7 +115,7 @@ def train():
     model = load_model()  # production model
 
     # Model params
-    learning_rate = 0.005
+    learning_rate = 0.001
     batch_size = 512
     patience = 5
 
@@ -287,8 +287,8 @@ def pred(X_pred: pd.DataFrame = None) -> np.ndarray:
 
 
 if __name__ == '__main__':
-    preprocess()
-    preprocess(source_type='val')
+    # preprocess()
+    # preprocess(source_type='val')
     train()
-    pred()
-    evaluate()
+    # pred()
+    # evaluate()

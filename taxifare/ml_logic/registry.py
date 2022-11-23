@@ -31,14 +31,17 @@ def save_model(model: Model = None,
 
         with mlflow.start_run():
             # saving metadata
-            mlflow.log_params(params)
-            mlflow.log_metrics(metrics)
+            if params is not None:
+                mlflow.log_params(params)
+            if metrics is not None:
+                mlflow.log_metrics(metrics)
 
-            mlflow.keras.log_model(keras_model=model,
-                                  artifact_path="model",
-                                  keras_module="tensorflow.keras",
-                                  registered_model_name=os.getenv("MLFLOW_MODEL_NAME"))
-            print("Saved model to MLFlow 👨‍🚀")
+            if model is not None:
+                mlflow.keras.log_model(keras_model=model,
+                                      artifact_path="model",
+                                      keras_module="tensorflow.keras",
+                                      registered_model_name=os.getenv("MLFLOW_MODEL_NAME"))
+                print("Saved model to MLFlow 👨‍🚀")
     else:
         # save params
         if params is not None:
@@ -69,22 +72,31 @@ def load_model(save_copy_locally=False) -> Model:
     """
     load the latest saved model, return None if no model found
     """
-    print(Fore.BLUE + "\nLoad model from local disk..." + Style.RESET_ALL)
 
-    # get latest model version
-    model_directory = os.path.join(LOCAL_REGISTRY_PATH, "models")
+    if os.getenv("MODEL_TARGET") == "mlflow":
+        print("Loading model from MLFlow... 🌊")
+        mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URL"))
 
-    results = glob.glob(f"{model_directory}/*")
-    if not results:
-        return None
+        model_uri = f"models:/{os.getenv('MLFLOW_EXPERIMENT')}/Production"
 
-    model_path = sorted(results)[-1]
-    print(f"- path: {model_path}")
+        model = mlflow.keras.load_model(model_uri=model_uri)
 
-    model = models.load_model(model_path)
-    print("\n✅ model loaded from disk")
+        return model
+    else:
+        # get latest model version
+        model_directory = os.path.join(LOCAL_REGISTRY_PATH, "models")
 
-    return model
+        results = glob.glob(f"{model_directory}/*")
+        if not results:
+            return None
+
+        model_path = sorted(results)[-1]
+        print(f"- path: {model_path}")
+
+        model = models.load_model(model_path)
+        print("\n✅ model loaded from disk")
+
+        return model
 
 
 def get_model_version(stage="Production"):
